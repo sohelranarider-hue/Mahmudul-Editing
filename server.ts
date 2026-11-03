@@ -612,55 +612,67 @@ Rules:
     const trimmedText = text.trim().slice(0, 4500);
     const ai = getGenAIClient();
 
-    // 1. If Gemini Studio engine is selected and GEMINI_API_KEY is configured, try Gemini TTS first
-    if (ai && engine === 'Gemini Studio') {
-      try {
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash-lite-tts',
-          contents: [
-            {
-              role: 'user',
-              parts: [
-                {
-                  text: trimmedText.slice(0, 2800),
-                  speechMetadata: {
-                    style: style || profile.stylePrompt,
-                  },
+    // 1. If GEMINI_API_KEY is configured, use Google AI Studio Gemini TTS with Playground prompt structure
+    if (ai) {
+      const ttsModels = [
+        'gemini-2.5-pro-preview-tts',
+        'gemini-3.8-flash-tts',
+        'gemini-3.8-flash-lite-tts',
+      ];
+
+      const playgroundPrompt = `Read the following transcript based on the audio profile and director's note.
+
+# Audio Profile
+${profile.stylePrompt}
+
+# Director's note
+Style: ${style || profile.stylePrompt}. Pace: Natural. Tone: Clear, emotional, human.
+
+## Transcript:
+${trimmedText.slice(0, 3000)}`;
+
+      for (const ttsModel of ttsModels) {
+        try {
+          const response = await ai.models.generateContent({
+            model: ttsModel,
+            contents: [
+              {
+                role: 'user',
+                parts: [{ text: playgroundPrompt }],
+              },
+            ],
+            config: {
+              responseModalities: ['AUDIO'],
+              speechConfig: {
+                voiceConfig: {
+                  prebuiltVoiceConfig: { voiceName: profile.prebuilt },
                 },
-              ],
-            },
-          ],
-          config: {
-            responseModalities: ['AUDIO'],
-            speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: { voiceName: profile.prebuilt },
               },
             },
-          },
-        });
-
-        const inlineData =
-          response.candidates?.[0]?.content?.parts?.[0]?.inlineData;
-        if (inlineData?.data) {
-          const { wavBuffer, durationSec } = await normalizeGeminiAudioToWav(
-            inlineData.data,
-            inlineData.mimeType || 'audio/wav'
-          );
-          res.json({
-            audioBase64: wavBuffer.toString('base64'),
-            mimeType: 'audio/wav',
-            voiceName,
-            engine: 'Gemini Studio',
-            durationSec,
           });
-          return;
+
+          const inlineData =
+            response.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+          if (inlineData?.data) {
+            const { wavBuffer, durationSec } = await normalizeGeminiAudioToWav(
+              inlineData.data,
+              inlineData.mimeType || 'audio/wav'
+            );
+            res.json({
+              audioBase64: wavBuffer.toString('base64'),
+              mimeType: 'audio/wav',
+              voiceName,
+              engine: 'Gemini Studio',
+              durationSec,
+            });
+            return;
+          }
+        } catch (geminiErr) {
+          console.warn(
+            `Gemini TTS model ${ttsModel} call attempt failed:`,
+            geminiErr instanceof Error ? geminiErr.message : geminiErr
+          );
         }
-      } catch (geminiErr) {
-        console.warn(
-          'Primary gemini-3.8-flash-lite-tts call failed, falling back to neural studio synthesis:',
-          geminiErr instanceof Error ? geminiErr.message : geminiErr
-        );
       }
     }
 
