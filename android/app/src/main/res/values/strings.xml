@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mahmud Auto Edit</string>
+    <string name="title_activity_main">Mahmud Auto Edit</string>
+    <string name="package_name">com.mahmudai.auto</string>
+    <string name="custom_url_scheme">com.mahmudai.auto</string>
+</resources>
