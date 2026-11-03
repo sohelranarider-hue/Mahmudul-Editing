@@ -1,0 +1,6 @@
+{
+  "name": "Mahmud Auto Edit",
+  "description": "Automated Bengali drama review video editor, frame extractor, perceptual duplicate remover, AI script expander, and voiceover studio.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

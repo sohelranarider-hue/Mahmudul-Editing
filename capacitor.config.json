@@ -1,0 +1,6 @@
+{
+  "appId": "com.mahmudai.auto",
+  "appName": "Mahmud Auto Edit",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
