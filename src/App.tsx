@@ -1193,7 +1193,7 @@ export default function App() {
               <img
                 src="/assets/aistudio/developer_logo_8aab034f.jpg"
                 alt="Mahmud Auto Edit Logo"
-                className="h-full w-full rounded-xl object-cover object-[center_38%]"
+                className="h-full w-full rounded-xl object-contain"
               />
             </div>
             <div className="min-w-0">
